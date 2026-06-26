@@ -1,0 +1,7 @@
+node_modules
+build
+.react-router
+supabase
+public
+*.min.*
+package-lock.json

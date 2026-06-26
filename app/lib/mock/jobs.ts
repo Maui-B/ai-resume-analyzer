@@ -1,0 +1,63 @@
+// app/lib/mock/jobs.ts
+import type { JobRow } from '../../../types/index';
+
+export const mockJobs: JobRow[] = [
+    {
+        id: '55555555-5555-5555-5555-555555555551',
+        company_id: '33333333-3333-3333-3333-333333333333',
+        posted_by: '22222222-2222-2222-2222-222222222222',
+        title: 'Senior Frontend Engineer',
+        description:
+            'Build the next generation of recruiter tooling. React, TypeScript, Supabase. Own the candidate dashboard end to end.',
+        location: 'Remote (SA)',
+        salary_min: 600000,
+        salary_max: 900000,
+        skills: ['React', 'TypeScript', 'Supabase', 'Tailwind'],
+        status: 'open',
+        created_at: '2026-06-05T08:00:00Z',
+        updated_at: '2026-06-05T08:00:00Z',
+    },
+    {
+        id: '55555555-5555-5555-5555-555555555552',
+        company_id: '33333333-3333-3333-3333-333333333333',
+        posted_by: '22222222-2222-2222-2222-222222222222',
+        title: 'Full-Stack Developer',
+        description:
+            'Own features end to end. Node, Postgres, edge functions. Comfortable across the stack.',
+        location: 'Cape Town',
+        salary_min: 550000,
+        salary_max: 850000,
+        skills: ['Node', 'Postgres', 'React'],
+        status: 'open',
+        created_at: '2026-06-08T08:00:00Z',
+        updated_at: '2026-06-08T08:00:00Z',
+    },
+    {
+        id: '55555555-5555-5555-5555-555555555553',
+        company_id: '33333333-3333-3333-3333-333333333333',
+        posted_by: '22222222-2222-2222-2222-222222222222',
+        title: 'DevOps Engineer',
+        description: 'Kubernetes, Terraform, CI/CD pipelines.',
+        location: 'Remote',
+        salary_min: 700000,
+        salary_max: 1100000,
+        skills: ['K8s', 'Terraform', 'AWS'],
+        status: 'paused',
+        created_at: '2026-05-20T08:00:00Z',
+        updated_at: '2026-06-01T08:00:00Z',
+    },
+    {
+        id: '55555555-5555-5555-5555-555555555554',
+        company_id: '33333333-3333-3333-3333-333333333333',
+        posted_by: '22222222-2222-2222-2222-222222222222',
+        title: 'Engineering Manager',
+        description: 'Lead a team of 6 engineers. IC background required.',
+        location: 'Johannesburg',
+        salary_min: 1200000,
+        salary_max: 1800000,
+        skills: ['Leadership', 'Coaching'],
+        status: 'closed',
+        created_at: '2026-04-10T08:00:00Z',
+        updated_at: '2026-05-15T08:00:00Z',
+    },
+];
