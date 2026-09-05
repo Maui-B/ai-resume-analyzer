@@ -49,7 +49,7 @@ const feedbackSenior: Feedback = {
     skills: {
         score: 90,
         tips: [
-            { type: 'good', tip: 'React + TypeScript + Supabase stack aligns well with target role.' },
+            { type: 'good', tip: 'React + TypeScript + Supabase stack aligns well with target role.', explanation: 'The required skills list explicitly mentions React and Supabase — your resume covers both.' },
         ],
     },
 };
@@ -65,7 +65,7 @@ const feedbackFullstack: Feedback = {
     toneAndStyle: {
         score: 74,
         tips: [
-            { type: 'good', tip: 'Consistent voice across roles.' },
+            { type: 'good', tip: 'Consistent voice across roles.', explanation: 'Your bullet points use parallel verb forms, which reads well to both humans and ATS parsers.' },
         ],
     },
     content: {
@@ -81,13 +81,13 @@ const feedbackFullstack: Feedback = {
     structure: {
         score: 73,
         tips: [
-            { type: 'improve', tip: 'Skills section is buried mid-page; move it higher.' },
+            { type: 'improve', tip: 'Skills section is buried mid-page; move it higher.', explanation: 'Recruiters scan top-down; skills near the top get more attention in the first 6 seconds.' },
         ],
     },
     skills: {
         score: 68,
         tips: [
-            { type: 'improve', tip: 'Mention testing frameworks — Cypress/Playwright.' },
+            { type: 'improve', tip: 'Mention testing frameworks — Cypress/Playwright.', explanation: 'Testing is an implicit requirement for full-stack roles; listing it signals maturity.' },
         ],
     },
 };
@@ -103,7 +103,7 @@ const feedbackJunior: Feedback = {
     toneAndStyle: {
         score: 70,
         tips: [
-            { type: 'good', tip: 'Friendly, human voice — appropriate for junior roles.' },
+            { type: 'good', tip: 'Friendly, human voice — appropriate for junior roles.', explanation: 'A conversational tone signals cultural fit at startups and small teams.' },
         ],
     },
     content: {
@@ -119,13 +119,13 @@ const feedbackJunior: Feedback = {
     structure: {
         score: 65,
         tips: [
-            { type: 'good', tip: 'Education is well placed at the bottom.' },
+            { type: 'good', tip: 'Education is well placed at the bottom.', explanation: 'For junior devs, education anchors the story while experience sections build upward.' },
         ],
     },
     skills: {
         score: 58,
         tips: [
-            { type: 'improve', tip: 'List specific libraries, not just “React”.' },
+            { type: 'improve', tip: 'List specific libraries, not just "React".', explanation: '"React, Redux, React Query, Next.js" is far more searchable than just "React".' },
         ],
     },
 };

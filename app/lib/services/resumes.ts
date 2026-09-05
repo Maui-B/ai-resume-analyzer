@@ -1,17 +1,44 @@
 // app/lib/services/resumes.ts
 
-import { getSupabase } from '../supabase';
+import { getSupabase, getCurrentUserId } from '../supabase';
 import { isDemoMode } from '../demo-mode';
 import { mockResumes } from '../mock/resumes';
+import type { Json } from '../../../types/database';
 
-function rowToResume(row: ResumeRow): Resume {
+export interface ResumeVersion {
+    id: string;
+    resumeId: string;
+    versionNumber: number;
+    jobTitle?: string;
+    companyName?: string;
+    jobDescription?: string;
+    imagePath: string;
+    resumePath: string;
+    feedback: Feedback;
+    createdAt: string;
+}
+
+type SupabaseResumeRow = {
+    id: string;
+    user_id: string;
+    job_title: string | null;
+    company_name: string | null;
+    job_description: string | null;
+    image_path: string | null;
+    resume_path: string | null;
+    feedback: Json | null;
+    created_at: string;
+    updated_at: string;
+};
+
+function rowToResume(row: SupabaseResumeRow): Resume {
     return {
         id: row.id,
         companyName: row.company_name ?? undefined,
         jobTitle: row.job_title ?? undefined,
         imagePath: row.image_path ?? '',
         resumePath: row.resume_path ?? '',
-        feedback: row.feedback ?? ({ overallScore: 0, ATS: { score: 0, tips: [] }, toneAndStyle: { score: 0, tips: [] }, content: { score: 0, tips: [] }, structure: { score: 0, tips: [] }, skills: { score: 0, tips: [] } } as Feedback),
+        feedback: (row.feedback as Feedback | null) ?? ({ overallScore: 0, ATS: { score: 0, tips: [] }, toneAndStyle: { score: 0, tips: [] }, content: { score: 0, tips: [] }, structure: { score: 0, tips: [] }, skills: { score: 0, tips: [] } } as Feedback),
         createdAt: row.created_at,
     };
 }
@@ -20,9 +47,12 @@ export async function listMyResumes(): Promise<Resume[]> {
     if (isDemoMode()) return mockResumes;
     const supabase = getSupabase();
     if (!supabase) return mockResumes;
+    const userId = await getCurrentUserId();
+    if (!userId) return mockResumes;
     const { data, error } = await supabase
         .from('resumes')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
     if (error) throw error;
     if (!data || data.length === 0) return mockResumes; // empty DB → fallback
@@ -78,7 +108,8 @@ export async function createResume(input: {
             job_description: input.jobDescription,
             image_path: input.imagePath,
             resume_path: input.resumePath,
-        })
+            feedback: null,
+        } as never)
         .select('*')
         .single();
     if (error) throw error;
@@ -89,8 +120,36 @@ export async function updateResumeFeedback(id: string, feedback: Feedback): Prom
     if (isDemoMode()) return;
     const supabase = getSupabase();
     if (!supabase) return;
-    const { error } = await supabase.from('resumes').update({ feedback }).eq('id', id);
+    
+    // Update the current resume's feedback
+    // In production, we'd call a database function to create versions
+    const { error } = await supabase.from('resumes').update({ 
+        feedback: feedback as unknown as Json 
+    }).eq('id', id);
+    
     if (error) throw error;
+}
+
+export async function getResumeVersions(resumeId: string): Promise<ResumeVersion[]> {
+    if (isDemoMode()) {
+        // In demo mode, return a mock version history
+        return [];
+    }
+    
+    const supabase = getSupabase();
+    if (!supabase) return [];
+    
+    const { data, error } = await supabase
+        .from('resume_versions')
+        .select('*')
+        .eq('resume_id', resumeId)
+        .order('version_number', { ascending: false });
+        
+    if (error) throw error;
+    if (!data) return [];
+    
+    // Type assertion needed for now since we're using the raw row type
+    return data as unknown as ResumeVersion[];
 }
 
 export async function deleteResume(id: string): Promise<void> {

@@ -1,5 +1,4 @@
 // app/lib/mock/applications.ts
-import type { ApplicationRow } from '../../../types/index';
 
 export const mockApplications: ApplicationRow[] = [
     {

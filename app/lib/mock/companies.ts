@@ -1,5 +1,4 @@
 // app/lib/mock/companies.ts
-import type { CompanyRow } from '../../../types/index';
 
 export const mockCompanies: CompanyRow[] = [
     {

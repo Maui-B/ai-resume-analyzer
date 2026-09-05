@@ -10,9 +10,7 @@ import {
 import type { Route } from './+types/root';
 import './app.css';
 import { useAuthStore } from '~/lib/auth';
-import { usePuterStore } from '~/lib/puter';
 import DemoModeBanner from '~/components/DemoModeBanner';
-import { env } from '~/lib/env';
 import { useEffect } from 'react';
 
 export const links: Route.LinksFunction = () => [
@@ -30,12 +28,10 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const initAuth = useAuthStore((s) => s.init);
-  const initPuter = usePuterStore((s) => s.init);
 
   useEffect(() => {
     initAuth();
-    if (env.usePuterAi) initPuter();
-  }, [initAuth, initPuter]);
+  }, [initAuth]);
 
   return (
     <html lang="en">
@@ -46,7 +42,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {env.usePuterAi && <script src="https://js.puter.com/v2/"></script>}
         <DemoModeBanner />
         {children}
         <ScrollRestoration />

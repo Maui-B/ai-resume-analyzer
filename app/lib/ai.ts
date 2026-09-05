@@ -1,10 +1,9 @@
 // app/lib/ai.ts
-// AI wrapper. Stage 0/1: routed through Puter (legacy).
-// Stage 2: routed through Supabase Edge Function 'ai-feedback'.
+// AI wrapper. Stage 2: routed through Supabase Edge Functions.
 
 import { env } from './env';
 import { prepareInstructions } from '../../constants';
-import { usePuterStore } from './puter';
+import type { MatchFeedback } from '../services/applications';
 
 interface AIResult {
     feedback: Feedback;
@@ -16,25 +15,51 @@ export async function analyzeResume(input: {
     jobTitle: string;
     jobDescription: string;
 }): Promise<AIResult | null> {
-    if (env.usePuterAi) {
-        const puter = usePuterStore.getState();
-        const response = await puter.ai.feedback(
-            input.resumePath,
-            prepareInstructions({
-                jobTitle: input.jobTitle,
-                jobDescription: input.jobDescription,
-            }),
-        );
-        if (!response) return null;
-        const text =
-            typeof response.message.content === 'string'
-                ? response.message.content
-                : response.message.content[0]?.text;
-        if (!text) return null;
-        return { feedback: JSON.parse(text) as Feedback };
+    // Call the Supabase Edge Function for AI feedback
+    const response = await fetch('/ai-feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            resumePath: input.resumePath,
+            jobTitle: input.jobTitle,
+            jobDescription: input.jobDescription,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('AI analysis error:', errorData);
+        throw new Error(errorData.error || 'AI analysis failed');
     }
-    // Stage 2 placeholder — Edge Function call goes here.
-    throw new Error(
-        'AI is unavailable: VITE_USE_PUTER_AI is false and the Edge Function is not yet wired.',
-    );
+
+    const result = await response.json();
+    return { feedback: result.feedback };
+}
+
+/** Get match score for a job/resume pair. */
+export async function getMatchScore(input: {
+    jobId: string;
+    resumeId: string;
+}): Promise<MatchFeedback | null> {
+    const response = await fetch('/match-score', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            jobId: input.jobId,
+            resumeId: input.resumeId,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Match score error:', errorData);
+        throw new Error(errorData.error || 'Match score calculation failed');
+    }
+
+    const result = await response.json();
+    return result.matchFeedback;
 }

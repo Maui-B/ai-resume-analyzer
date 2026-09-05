@@ -1,5 +1,4 @@
 // app/lib/mock/profiles.ts
-import type { ProfileRow } from '../../../types/index';
 
 export const mockProfiles: ProfileRow[] = [
     {

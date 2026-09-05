@@ -33,6 +33,12 @@ export default function DashboardLayout() {
             <Link to="/dashboard/applications" className="text-dark-200 hover:text-black">
               Applications
             </Link>
+            <Link to="/dashboard/team" className="text-dark-200 hover:text-black">
+              Team
+            </Link>
+            <Link to="/dashboard/reports" className="text-dark-200 hover:text-black">
+              Reports
+            </Link>
           </nav>
           <Outlet />
         </div>

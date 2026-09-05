@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 import { getSupabase } from './supabase';
-import type { UserRole } from '../../types/index';
+import type { Session } from '@supabase/supabase-js';
 
 interface AppUser {
     id: string;
@@ -66,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await loadProfile(session.user.id, set);
         }
 
-        supabase.auth.onAuthStateChange(async (_event, session) => {
+        supabase.auth.onAuthStateChange(async (_event: string, session: Session | null) => {
             if (session?.user) {
                 await loadProfile(session.user.id, set);
             } else {

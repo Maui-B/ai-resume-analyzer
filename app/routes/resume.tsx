@@ -5,7 +5,8 @@ import Summary from '~/components/Summary';
 import ATS from '~/components/ATS';
 import Details from '~/components/Details';
 import { useAuthStore } from '~/lib/auth';
-import { getResume } from '~/lib/services/resumes';
+import { getResume, getResumeVersions } from '~/lib/services/resumes';
+import type { ResumeVersion } from '~/lib/services/resumes';
 
 export const meta = () => [
   { title: 'Resumind | Review' },
@@ -17,7 +18,8 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
   if (!user) throw redirect(`/auth?next=/resume/${params.id}`);
   if (user.role !== 'jobseeker') throw redirect('/dashboard');
   const resume = await getResume(params.id);
-  return { resume };
+  const versions = await getResumeVersions(params.id);
+  return { resume, versions };
 }
 
 export default function Resume({ loaderData }: Route.ComponentProps) {
@@ -27,16 +29,34 @@ export default function Resume({ loaderData }: Route.ComponentProps) {
   const [feedback, setFeedback] = useState<Feedback | null>(
     (loaderData?.resume?.feedback as Feedback) ?? null,
   );
+  const [versions, setVersions] = useState<ResumeVersion[]>(loaderData?.versions ?? []);
+  const [selectedVersion, setSelectedVersion] = useState<ResumeVersion | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const resume = loaderData?.resume;
+    const versionData = loaderData?.versions ?? [];
+    
     if (!resume) return;
-    setFeedback(resume.feedback as Feedback);
-    // imagePath / resumePath may be data URIs (demo), public URLs, or storage paths.
-    // For now we treat anything starting with "/" as a public path on this app.
-    if (resume.imagePath) {
-      setImageUrl(resume.imagePath);
-      setResumeUrl(resume.resumePath || resume.imagePath);
+    setVersions(versionData);
+    
+    // Set initial state to the first version (latest)
+    if (versionData.length > 0) {
+      const latestVersion = versionData[0];
+      setSelectedVersion(latestVersion);
+      setFeedback(latestVersion.feedback);
+      
+      if (latestVersion.imagePath) {
+        setImageUrl(latestVersion.imagePath);
+        setResumeUrl(latestVersion.resumePath || latestVersion.imagePath);
+      }
+    } else {
+      // Fallback to original resume data if no versions exist
+      setFeedback(resume.feedback as Feedback);
+      if (resume.imagePath) {
+        setImageUrl(resume.imagePath);
+        setResumeUrl(resume.resumePath || resume.imagePath);
+      }
     }
   }, [loaderData]);
 
@@ -49,6 +69,13 @@ export default function Resume({ loaderData }: Route.ComponentProps) {
       if (resumeUrl.startsWith('blob:')) URL.revokeObjectURL(resumeUrl);
     };
   }, [imageUrl, resumeUrl]);
+
+  const handleVersionChange = (version: ResumeVersion) => {
+    setSelectedVersion(version);
+    setFeedback(version.feedback);
+    setImageUrl(version.imagePath);
+    setResumeUrl(version.resumePath);
+  };
 
   return (
     <main className="!pt-0">
@@ -71,9 +98,49 @@ export default function Resume({ loaderData }: Route.ComponentProps) {
               </a>
             </div>
           )}
+          {versions.length > 1 && (
+            <div className="mt-4 flex justify-center">
+              <button 
+                onClick={() => setShowHistory(!showHistory)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showHistory ? 'Hide History' : `Show History (${versions.length} versions)`}
+              </button>
+            </div>
+          )}
         </section>
         <section className="feedback-section">
-          <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
+          <div className="flex justify-between items-start mb-6">
+            <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
+            {selectedVersion && versions.length > 1 && (
+              <div className="text-sm text-dark-200">
+                Version {selectedVersion.versionNumber} • {new Date(selectedVersion.createdAt).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+          
+          {showHistory && versions.length > 1 && (
+            <div className="mb-8 bg-white rounded-2xl p-4 shadow-sm">
+              <h3 className="font-semibold mb-2">Version History</h3>
+              <div className="flex flex-wrap gap-2">
+                {versions.map((version) => (
+                  <button
+                    key={version.id}
+                    onClick={() => handleVersionChange(version)}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      selectedVersion?.id === version.id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    V{version.versionNumber}
+                    {version.id === versions[0].id && ' (Latest)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />

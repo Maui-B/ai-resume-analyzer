@@ -26,3 +26,7 @@ npm-debug.log*
 
 # Test / coverage (when added later)
 coverage/
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json

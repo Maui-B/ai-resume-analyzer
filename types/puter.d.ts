@@ -67,3 +67,42 @@ interface AIResponse {
     }[];
     via_ai_chat_service: boolean;
 }
+
+interface PuterAI {
+    chat(
+        prompt: string | ChatMessage[],
+        imageURL?: string | PuterChatOptions,
+        testMode?: boolean,
+        options?: PuterChatOptions,
+    ): Promise<AIResponse>;
+}
+
+interface PuterKV {
+    get(key: string): Promise<string | null>;
+    set(key: string, value: string): Promise<void>;
+    list(prefix?: string, recursive?: boolean): Promise<KVItem[]>;
+    del(key: string): Promise<void>;
+    flush(): Promise<void>;
+}
+
+interface PuterFS {
+    readDir(path: string): Promise<FSItem[]>;
+    delete(path: string): Promise<void>;
+    upload(path: string, file: File | Blob): Promise<FSItem>;
+}
+
+interface Puter {
+    ai: PuterAI;
+    fs: PuterFS;
+    kv: PuterKV;
+    auth: {
+        signIn(): Promise<void>;
+        signOut(): Promise<void>;
+        isAuthenticated: boolean;
+        user: PuterUser | null;
+    };
+}
+
+interface Window {
+    puter: Puter;
+}

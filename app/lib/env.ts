@@ -5,7 +5,7 @@ export const env = {
     supabaseUrl: import.meta.env.VITE_SUPABASE_URL ?? '',
     supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? '',
     demoMode: import.meta.env.VITE_DEMO_MODE === 'true',
-    usePuterAi: import.meta.env.VITE_USE_PUTER_AI !== 'false',
+    usePuterAi: import.meta.env.VITE_USE_PUTER_AI === 'true', // Changed default to false as we're using Edge Functions
 } as const;
 
 export function isSupabaseConfigured(): boolean {

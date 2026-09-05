@@ -9,7 +9,6 @@ import { generateUUID } from '~/lib/utils';
 import { analyzeResume } from '~/lib/ai';
 import { createResume, updateResumeFeedback } from '~/lib/services/resumes';
 import { isDemoMode } from '~/lib/demo-mode';
-import { usePuterStore } from '~/lib/puter';
 
 export const meta = () => [
   { title: 'Resumind | Upload' },
@@ -28,7 +27,6 @@ export default function Upload() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const puterReady = usePuterStore((s) => s.puterReady);
 
   const handleFileSelect = (f: File | null) => setFile(f);
 
@@ -154,7 +152,7 @@ export default function Upload() {
               <button
                 className="primary-button"
                 type="submit"
-                disabled={!puterReady && !isDemoMode()}
+                disabled={isProcessing}
               >
                 Analyze Resume
               </button>

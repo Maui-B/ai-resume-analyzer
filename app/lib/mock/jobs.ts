@@ -1,5 +1,4 @@
 // app/lib/mock/jobs.ts
-import type { JobRow } from '../../../types/index';
 
 export const mockJobs: JobRow[] = [
     {

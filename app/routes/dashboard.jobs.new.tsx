@@ -2,6 +2,8 @@ import type { Route } from './+types/dashboard.jobs.new';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { createJob } from '~/lib/services/jobs';
+import { useAuthStore } from '~/lib/auth';
+import { usePuterStore } from '~/lib/puter';
 
 export async function clientLoader(_args: Route.ClientLoaderArgs) {
   return null;
@@ -9,14 +11,18 @@ export async function clientLoader(_args: Route.ClientLoaderArgs) {
 
 export default function NewJob() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [salaryMin, setSalaryMin] = useState('');
   const [salaryMax, setSalaryMax] = useState('');
   const [skills, setSkills] = useState('');
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const { isLoading: isPuterLoading } = usePuterStore();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,6 +48,31 @@ export default function NewJob() {
       setError(err instanceof Error ? err.message : 'Failed to create job');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const generateSkills = async () => {
+    if (!description.trim() || !user) return;
+    
+    setGenerating(true);
+    try {
+      // In Stage 2, we'll replace this with a proper Edge Function call
+      // For now, we'll simulate the behavior
+      const mockSuggestions = [
+        'React', 'TypeScript', 'Supabase', 'Tailwind CSS', 
+        'Node.js', 'PostgreSQL', 'AWS', 'Docker'
+      ];
+      setSuggestedSkills(mockSuggestions);
+    } catch (err) {
+      setError('Failed to generate skills');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const applySuggestion = (suggestion: string) => {
+    if (!skills.includes(suggestion)) {
+      setSkills(skills ? `${skills}, ${suggestion}` : suggestion);
     }
   };
 
@@ -105,15 +136,47 @@ export default function NewJob() {
             />
           </div>
         </div>
+        
+        {/* AI Skills Suggestion Section */}
         <div className="form-div">
-          <label htmlFor="skills">Skills (comma separated)</label>
+          <div className="flex justify-between items-center mb-2">
+            <label htmlFor="skills">Skills (comma separated)</label>
+            <button
+              type="button"
+              onClick={generateSkills}
+              disabled={generating || isPuterLoading || !description.trim()}
+              className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {generating ? 'Generating...' : 'Suggest skills'}
+            </button>
+          </div>
           <input
             id="skills"
             value={skills}
             onChange={(e) => setSkills(e.target.value)}
             placeholder="React, TypeScript, Supabase"
           />
+          
+          {/* Suggested skills */}
+          {suggestedSkills.length > 0 && (
+            <div className="mt-3">
+              <p className="text-sm text-dark-200 mb-2">Suggested skills:</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedSkills.map((skill, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => applySuggestion(skill)}
+                    className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-2 py-1 rounded-full"
+                  >
+                    {skill}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+        
         <button className="primary-button" type="submit" disabled={submitting}>
           {submitting ? 'Publishing…' : 'Publish job'}
         </button>
